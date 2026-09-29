@@ -1,0 +1,47 @@
+[
+  {
+    "donation_id": "D-1001",
+    "donor_name": "Panera Bread",
+    "food_type": "prepared_meals",
+    "quantity": 25,
+    "ready_time": 0,
+    "expiry_time": 90,
+    "pickup_area": "Fullerton"
+  },
+  {
+    "donation_id": "D-1002",
+    "donor_name": "Trader Joes",
+    "food_type": "produce",
+    "quantity": 40,
+    "ready_time": 10,
+    "expiry_time": 200,
+    "pickup_area": "Fullerton"
+  },
+  {
+    "donation_id": "D-1003",
+    "donor_name": "Campus Catering",
+    "food_type": "prepared_meals",
+    "quantity": 15,
+    "ready_time": 5,
+    "expiry_time": 60,
+    "pickup_area": "Fullerton"
+  },
+  {
+    "donation_id": "D-1004",
+    "donor_name": "Corner Bakery",
+    "food_type": "baked_goods",
+    "quantity": 10,
+    "ready_time": 0,
+    "expiry_time": 300,
+    "pickup_area": "Anaheim"
+  },
+  {
+    "donation_id": "D-1005",
+    "donor_name": "Farmers Market",
+    "food_type": "produce",
+    "quantity": 60,
+    "ready_time": 20,
+    "expiry_time": 150,
+    "pickup_area": "Fullerton"
+  }
+]

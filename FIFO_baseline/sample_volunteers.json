@@ -1,0 +1,26 @@
+[
+  {
+    "volunteer_id": "V-301",
+    "vehicle_capacity": 30,
+    "area": "Fullerton",
+    "available_from": 0,
+    "available_to": 600,
+    "max_pickups": 3
+  },
+  {
+    "volunteer_id": "V-302",
+    "vehicle_capacity": 50,
+    "area": "Fullerton",
+    "available_from": 0,
+    "available_to": 600,
+    "max_pickups": 2
+  },
+  {
+    "volunteer_id": "V-303",
+    "vehicle_capacity": 20,
+    "area": "Anaheim",
+    "available_from": 0,
+    "available_to": 600,
+    "max_pickups": 2
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "recipient_id": "R-01",
+    "org_name": "Community Shelter",
+    "accepted_food_types": ["prepared_meals", "produce"],
+    "capacity": 50,
+    "area": "Fullerton",
+    "closing_time": 600
+  },
+  {
+    "recipient_id": "R-02",
+    "org_name": "Downtown Food Pantry",
+    "accepted_food_types": ["produce", "baked_goods"],
+    "capacity": 30,
+    "area": "Anaheim",
+    "closing_time": 500
+  },
+  {
+    "recipient_id": "R-03",
+    "org_name": "Neighborhood Fridge",
+    "accepted_food_types": ["prepared_meals"],
+    "capacity": 20,
+    "area": "Fullerton",
+    "closing_time": 400
+  }
+]
