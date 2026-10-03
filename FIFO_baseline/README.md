@@ -37,3 +37,17 @@
 ## Note
 - no greedy scheduler
 - no time-window checks
+## Professor will ask for Base case of our algos
+## Refer to slide 39 week 6 for help with Dynamic-Programming design checklist
+
+## 10/03 fix: fifo_schedule
+- line 97-98
+  - added fits_time = donation["ready_timme"] < recipient["closing_time"]
+  - if condition now also requires fits_time
+- line 119-120 (volunteer loop)
+  - added fits_availability = volunteer["available_from"] <= donation["ready_time"] <= volunteer["available_to"]
+  - if condition now also requires fits_availability
+- reason messages
+  - added reasons for failure (closed vs capacity, unavailable vs no capacity)
+- TLDR
+  - a donation can no longer be matched to a recipient that's already closed, or a volunteer who isn't available at the donations ready time
