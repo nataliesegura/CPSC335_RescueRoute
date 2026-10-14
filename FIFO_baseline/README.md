@@ -68,3 +68,13 @@
 - added brief descriptions for each test
 - total of 17 tests now, all passing
 - covers 9/10 of the rubric's required test cases — only the FIFO-vs-greedy and fairness cases remain
+
+## 10/13 - Natalie - rr_greedy.py
+- implemented urgency-first greedy priority sorting (remaining shelf life, then quantity, then ready time)
+- added expanded metrics calculation for rescue rates and capacity utilizations
+- imported core validators and loaders from the FIFO baseline
+
+## 10/14 - Natalie - test_greedy.py
+- added `testGreedyPriorities` to verify urgency takes precedence over arrival order
+- added `testGreedyNormal` to verify baseline scheduling assignments
+- added `testExpandedMetrics` to validate metrics calculations; all tests passing
