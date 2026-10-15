@@ -82,7 +82,11 @@ def greedySchedule(donations, recipients, volunteers):
             fits_food = donation["food_type"] in recipient["accepted_food_types"]
             fits_area = donation["pickup_area"] == recipient["area"]
             fits_cap = remaining_capacity[recipient["recipient_id"]] >= donation["quantity"]
-            fits_time = donation["ready_time"] < recipient["closing_time"]
+            scheduled_time = donation["ready_time"]
+            fits_time = (
+                scheduled_time < donation["expiry_time"]
+                and scheduled_time < recipient["closing_time"]
+            )
 
             if fits_food and fits_area and fits_cap and fits_time:
                 chosen_recipient = recipient
@@ -124,6 +128,7 @@ def greedySchedule(donations, recipients, volunteers):
             "donation_id": donation["donation_id"],
             "recipient_id": chosen_recipient["recipient_id"],
             "volunteer_id": chosen_volunteer["volunteer_id"],
+            "scheduled_time": donation["ready_time"],
             "status": "assigned",
             "reason": f"assigned by greedy rule (shelf life: {shelf_life} mins) to {chosen_recipient['org_name']} with {chosen_volunteer['volunteer_id']}."
         })
@@ -144,6 +149,23 @@ def computeExpandedMetrics(donations, recipients, volunteers, assignments, unass
     total_vol_cap = sum(v["vehicle_capacity"] * v["max_pickups"] for v in volunteers)
     vol_util = (rescued / total_vol_cap * 100) if total_vol_cap > 0 else 0.0
 
+    urgent_donations = [
+        d for d in donations
+        if 0 < (d["expiry_time"] - d["ready_time"]) <= 120
+    ]
+
+    assigned_ids = {a["donation_id"] for a in assignments}
+
+    urgent_assigned = sum(
+        1 for d in urgent_donations
+        if d["donation_id"] in assigned_ids
+    )
+
+    urgent_rate = (
+        urgent_assigned / len(urgent_donations) * 100
+        if urgent_donations else 0.0
+    )
+
     return {
         "donations_received": len(donations),
         "donations_assigned": len(assignments),
@@ -152,6 +174,7 @@ def computeExpandedMetrics(donations, recipients, volunteers, assignments, unass
         "quantity_at_risk": at_risk,
         "recipient_capacity_utilization_pct": round(recip_util, 2),
         "volunteer_capacity_utilization_pct": round(vol_util, 2),
+        "urgent_rate": round(urgent_rate, 2),
     }
 
 
@@ -165,5 +188,20 @@ if __name__ == "__main__":
     validateVolunteers(volunteers)
 
     assignments, unassigned = greedySchedule(donations, recipients, volunteers)
-    print("Greedy Assignments:", len(assignments))
+    
+    metrics = computeExpandedMetrics(
+        donations,
+        recipients,
+        volunteers,
+        assignments,
+        unassigned
+    )
+    
+    print("\nGreedy Assignments:", len(assignments))
     print("Greedy Unassigned:", len(unassigned))
+
+    print("\nGreedy Performance Metrics")
+    print("-" * 45)
+
+    for metric, value in metrics.items():
+        print(f"{metric}: {value}")
