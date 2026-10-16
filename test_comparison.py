@@ -1,4 +1,11 @@
+import os
+import sys
 import unittest
+
+# the two strategies live in subfolders, so tell Python where to find them
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, "FIFO_baseline"))
+sys.path.insert(0, os.path.join(HERE, "Greedy_Strategy"))
 
 from rr_fifo import fifo_schedule
 from rr_greedy import greedySchedule, computeExpandedMetrics

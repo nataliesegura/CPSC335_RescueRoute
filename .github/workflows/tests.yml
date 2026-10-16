@@ -22,3 +22,16 @@ jobs:
       - name: Run FIFO baseline tests
         working-directory: FIFO_baseline
         run: python -m unittest test_fifo.py -v
+
+      - name: Run greedy tests
+        working-directory: Greedy_Strategy
+        run: python -m unittest test_greedy.py -v
+
+      - name: Run FIFO vs greedy comparison tests
+        run: python -m unittest test_comparison.py -v
+
+      - name: Run greedy explanation tests
+        run: python -m unittest test_explanations.py -v
+
+      - name: Make sure the comparison report runs
+        run: python compare_strategies.py
