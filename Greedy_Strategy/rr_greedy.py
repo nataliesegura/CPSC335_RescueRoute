@@ -16,7 +16,6 @@ def loadVolunteers(path):
     with open(path, encoding="utf-8") as e:
         return json.load(e)
 
-
 # validators:
 def validateDonations(donations):
     seen_ids = set()
@@ -32,7 +31,6 @@ def validateDonations(donations):
         if donation["ready_time"] >= donation["expiry_time"]:
             raise ValueError(f"{donation_id}: expiry_time must be after ready_time")
     return True
-
 
 def validateRecipients(recipients):
     seen_ids = set()
@@ -75,6 +73,23 @@ def greedySchedule(donations, recipients, volunteers):
     unassigned = []
 
     sorted_donations = sorted(donations, key=lambda d: ((d["expiry_time"] - d["ready_time"]), -d["quantity"], d["ready_time"]))
+    # Track the original order of donations
+    original_order = {
+        d["donation_id"]: i
+        for i, d in enumerate(donations)
+    }
+
+        # Record changes in scheduling priority
+    for new_position, donation in enumerate(sorted_donations):
+        old_position = original_order[donation["donation_id"]]
+
+        if new_position > old_position:
+            print(
+                f"Deferred: Donation {donation['donation_id']} "
+                f"was moved from position {old_position + 1} "
+                f"to position {new_position + 1} "
+                f"because other donations had higher greedy priority."
+            )
 
     for donation in sorted_donations:
         chosen_recipient = None
@@ -105,7 +120,7 @@ def greedySchedule(donations, recipients, volunteers):
             fits_area = donation["pickup_area"] == volunteer["area"]
             fits_vehicle = volunteer["vehicle_capacity"] >= donation["quantity"]
             has_pickups = remaining_pickups[volunteer["volunteer_id"]] > 0
-            fits_availability = volunteer["available_from"] <= donation["ready_time"] <= volunteer["available_to"]
+            fits_availability = volunteer["available_from"] <= scheduled_time <= volunteer["available_to"]
 
             if fits_area and fits_vehicle and has_pickups and fits_availability:
                 chosen_volunteer = volunteer
@@ -135,8 +150,7 @@ def greedySchedule(donations, recipients, volunteers):
 
     return assignments, unassigned
 
-
-# metrics things
+# Compute Metrics
 def computeExpandedMetrics(donations, recipients, volunteers, assignments, unassigned):
     quantity_by_id = {d["donation_id"]: d["quantity"] for d in donations}
     
@@ -153,7 +167,8 @@ def computeExpandedMetrics(donations, recipients, volunteers, assignments, unass
         d for d in donations
         if 0 < (d["expiry_time"] - d["ready_time"]) <= 120
     ]
-
+    
+# Urgent Rate
     assigned_ids = {a["donation_id"] for a in assignments}
 
     urgent_assigned = sum(
@@ -196,7 +211,8 @@ if __name__ == "__main__":
         assignments,
         unassigned
     )
-    
+
+    # Auto-print metrics
     print("\nGreedy Assignments:", len(assignments))
     print("Greedy Unassigned:", len(unassigned))
 

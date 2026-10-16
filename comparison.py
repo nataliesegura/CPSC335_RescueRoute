@@ -1,0 +1,1 @@
+def compare_strategies(fifo_)
