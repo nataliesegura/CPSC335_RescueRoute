@@ -1,52 +1,40 @@
-## FIFO Baseline
-- json loader
-  - accepted_food_types -> set for O(1) checks
-  - same method used in streambox_app
-- validation
-  - validates the data, in this case it is the sample json files
-  - seen_ids -> set for O(1) duplication checks
-  - same method used in Campus_Space
-- fifo_schedule
-  - linear scan + break on first match
-  - similar to linear_title_search from streambox_app
-  - separate dicts for remaining_capacity/remaining_pickups
-    - this leaves room for implementing a greedy version that can reuse the same data
-- metrics
-  - assignments/unassigned split like in select_max_compatible_events() from Campus_Space
-  - compute_metrics, single pass + sum()
-    - no repeated lookups, similar to summarize_streamflow()
+# RescueRoute: Automated Food Rescue Scheduling & Dispatch Engine
 
-## FIFO Test
-- TestValidation
-  - 7 tests, one per rule
-    - separate duplicate tests for recipients, volunteers, and donations
-    - a check for ready_time >= expiry_time
-    - a check for negative quantity
-    - a check for already-expired donations (ready_time == expiry_time)
-    - valid input does not raise
-- TestFifoSchedule
-  - Everything compatible -> correct recipient + volunteer assigned
-  - recipient doesn't accept food type -> unassigned, with a reason mentioning it
-  - Donation too large for any recipient -> unassigned
-  - Recipient fits, no volunteer does -> reason correctly blames the volunteer
-  - 2 donations 1 recipient, room for 1 -> FIFO order wins, first donation gets it
-  - no donations at all -> returns two empty list, no crash
-  - tight but valid window -> still matches correctly (near-expiry case)
-  - no recipients at all -> no crash, unassigned
-  - no volunteers at all -> no crash, unassigned
-- TestMetrics
-  - runs fifo_schedule then compute_metrics
-    - checks every metric (received, assigned, unassigned, rescued, at-risk) against hand calculated values
-- 17/17 tests passing. Covers 9/10 of the rubric's required test cases — only the FIFO-vs-greedy and fairness cases remain, pending the greedy scheduler.
+## Architecture
+* **Data Loading & Validation**: JSON input datasets are ingested and schema-checked using O(1) set lookups for duplicate prevention and food type compatibility.
+* **Scheduling Engines**:
+  * **FIFO Baseline (`rr_fifo.py`)**: Processes donations strictly in the order they arrive using a linear-scan matching strategy.
+  * **Urgency-First Greedy Scheduler (`rr_greedy.py`)**: Multi-tier priority sorting engine that minimizes food waste by prioritizing high-urgency donations.
+* **Explainability Module**: Attaches human-readable reason strings to every assignment, unassignment, or deferral (including specific trade-off tracking for deferred items).
+* **Metrics & Analytics**: Synthesizes expanded operational performance metrics, including rescue rates, capacity utilizations, and urgent rescue percentages.
 
-## Known Limitations
-- no greedy scheduler yet (Week 2)
+## Data Model
+* **Donations**: `donation_id`, `donor_name`, `food_type`, `quantity`, `ready_time`, `expiry_time`, `pickup_area`
+* **Recipients**: `recipient_id`, `org_name`, `accepted_food_types` (stored as a set for O(1) checks), `capacity`, `area`, `closing_time`
+* **Volunteers**: `volunteer_id`, `vehicle_capacity`, `area`, `available_from`, `available_to`, `max_pickups`
 
-## Personal Notes
-- Professor will ask for base case of our algos
-- Refer to slide 39, week 6, for the Dynamic-Programming design checklist
+## Greedy Rule
+The `rr_greedy.py` module replaces simple arrival ordering with an **Urgency-First Multi-Tier Priority Rule**. Donations are sorted and evaluated using the following sequence:
+- **Shortest Remaining Shelf-Life**: (`expiry_time` - `ready_time`) — prioritizes items nearest to expiration.
+- **Largest Quantity**: Maximizes food rescue volume per dispatch on a tie.
+- **Earliest Arrival Time**: Tie-breaker for identical shelf life and quantity.
+- Items that would normally fit at full capacity but lose their room to an earlier high-priority donation are explicitly categorized as **"deferred"**, with their explanation strings detailing which donations took precedence.
 
-## Changelog
+## Complexity Analysis
+* **Data Validation**: O(N + R + V) where N is donations, R is recipients, and V is volunteers.
+* **FIFO Scheduler**: O(N * R * V) worst-case matching scan over active candidates.
+* **Greedy Scheduler**: O(N log N) for initial multi-tier sorting + O(N * R * V) execution scan.
+* **Space Complexity**: O(N + R + V) for state tracking dictionaries (remaining capacities, pickups, and deferral histories).
+
+## Limitations
+* **Static Batch Routing**: Operates on fixed batch datasets rather than real-time dynamic streaming events.
+* **Single-Volunteer Assignment**: Each donation is assigned to a single designated volunteer rather than splitting large quantities across multiple drivers.
+
+## References
+* Course lecture notes, data structures, and algorithmic optimization design checklists.
+* Project specification guidelines and baseline architecture templates.
+
+## Team Contributions
 
 ### 10/03 - Casey - fix: fifo_schedule
 - line 97-98
@@ -69,15 +57,20 @@
 - total of 17 tests now, all passing
 - covers 9/10 of the rubric's required test cases — only the FIFO-vs-greedy and fairness cases remain
 
-## 10/13 - Natalie - rr_greedy.py
+### 10/13 - Natalie - rr_greedy.py
 - implemented urgency-first greedy priority sorting (remaining shelf life, then quantity, then ready time)
 - added expanded metrics calculation for rescue rates and capacity utilizations
 - imported core validators and loaders from the FIFO baseline
 
-## 10/14 - Natalie - test_greedy.py
+### 10/14 - Natalie - test_greedy.py
 - added `testGreedyPriorities` to verify urgency takes precedence over arrival order
 - added `testGreedyNormal` to verify baseline scheduling assignments
 - added `testExpandedMetrics` to validate metrics calculations; all tests passing
 
-## 10/15 - Miko - rr_greedy.py
-- added 'scheduled_time' to assignments for 
+### 10/15 - Miko - rr_greedy.py
+- added 'scheduled_time' to assignments for rr_greedy
+- implemented metric computation for rr_greedy and rr_fifo by import to work with compare file
+- cleaned up rr_greedy code and added deferrment reasoning
+- implemented urgency functions in rr_greedy
+- added comparison feature using copy in order to preserve data from both algorithms
+- added comparison tests 
