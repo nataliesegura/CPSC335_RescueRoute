@@ -78,3 +78,6 @@
 - added `testGreedyPriorities` to verify urgency takes precedence over arrival order
 - added `testGreedyNormal` to verify baseline scheduling assignments
 - added `testExpandedMetrics` to validate metrics calculations; all tests passing
+
+## 10/15 - Miko - rr_greedy.py
+- added 'scheduled_time' to assignments for 
